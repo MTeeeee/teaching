@@ -1,4 +1,4 @@
-
+aws_profile = "awsprofile"
 
 region = "eu-central-1"
 
