@@ -9,7 +9,7 @@ Diese Woche wollen wir die gelernten Dinge der letzten Wochen zusammenführen in
 2. Füge den provider ein:
 
 ```terraform 
-{
+terraform {
   required_version = ">= 1.0" # Wir wollen mindestens terraform version 1.0 verwenden
 
   required_providers {
