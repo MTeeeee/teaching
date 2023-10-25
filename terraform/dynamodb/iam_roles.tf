@@ -54,12 +54,25 @@ resource "aws_iam_policy" "iam_policy_for_lambda2" {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::hello-s3-20231025/*"
+            "Resource": "arn:aws:s3:::hello-s3-20231022/*"
         }
     ]
 }
 EOF
 }
+
+
+# {
+#     "Version": "2012-10-17",
+#     "Statement": [
+#         {
+#             "Sid": "VisualEditor0",
+#             "Effect": "Allow",
+#             "Action": "dynamodb:PutItem",
+#             "Resource": "arn:aws:dynamodb:eu-central-1:971147695342:table/Messages"
+#         }
+#     ]
+# }
 
 # Policy Attachment on the role.
 
@@ -67,7 +80,6 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
   role        = aws_iam_role.lambda_role.name
   policy_arn  = aws_iam_policy.iam_policy_for_lambda.arn
 }
-
 resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role2" {
   role        = aws_iam_role.lambda_role.name
   policy_arn  = aws_iam_policy.iam_policy_for_lambda2.arn

@@ -54,7 +54,26 @@ resource "aws_iam_policy" "iam_policy_for_lambda2" {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::hello-s3-20231025/*"
+            "Resource": "arn:aws:s3:::hello-s3-20231022/*"
+        }
+    ]
+}
+EOF
+}
+resource "aws_iam_policy" "iam_policy_for_lambda_sqs" {
+
+  name         = "aws_iam_policy_for_terraform_aws_lambda_role_sqs"
+  path         = "/"
+  description  = "AWS IAM Policy for managing aws lambda role"
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "sqs:*",
+            "Resource": "*"
         }
     ]
 }
@@ -71,4 +90,9 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
 resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role2" {
   role        = aws_iam_role.lambda_role.name
   policy_arn  = aws_iam_policy.iam_policy_for_lambda2.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role_sqs" {
+  role        = aws_iam_role.lambda_role.name
+  policy_arn  = aws_iam_policy.iam_policy_for_lambda_sqs.arn
 }

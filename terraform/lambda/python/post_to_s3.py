@@ -7,7 +7,7 @@ def lambda_handler(event, context):
     message = event["body"]
     
     s3 = boto3.client('s3')
-    bucket_name = 'hello-s3-20231022'
+    bucket_name = 'hello-s3-20231025'
     file_name = str(uuid.uuid4()) + '.txt'
     file_content = message
     

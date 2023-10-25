@@ -1,3 +1,3 @@
 resource "aws_s3_bucket" "example" {
-  bucket = "hello-s3-20231025"
+  bucket = "hello-s3-20231024"
 }
