@@ -1,6 +1,6 @@
 resource "aws_iam_role" "lambda_role" {
  name   = "terraform_aws_lambda_role"
- assume_role_policy = <<EOF
+ assume_role_policy = jsonencode(
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -13,7 +13,7 @@ resource "aws_iam_role" "lambda_role" {
         }
     ]
 }
-EOF
+)
 }
 
 # IAM policy for logging from a lambda
@@ -23,7 +23,7 @@ resource "aws_iam_policy" "iam_policy_for_lambda" {
   name         = "aws_iam_policy_for_terraform_aws_lambda_role"
   path         = "/"
   description  = "AWS IAM Policy for managing aws lambda role"
-  policy = <<EOF
+  policy = jsonencode(
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -38,46 +38,53 @@ resource "aws_iam_policy" "iam_policy_for_lambda" {
     }
   ]
 }
-EOF
+)
 }
 
-resource "aws_iam_policy" "iam_policy_for_lambda2" {
 
-  name         = "aws_iam_policy_for_terraform_aws_lambda_role2"
+resource "aws_iam_policy" "read_dynamo_stream" {
+  name         = "read_dynamo_stream"
   path         = "/"
-  description  = "AWS IAM Policy for managing aws lambda role"
-  policy = <<EOF
+  policy = jsonencode(
 {
     "Version": "2012-10-17",
     "Statement": [
         {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
-            "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::hello-s3-202310222/*"
-        }
-    ]
-}
-EOF
-}
-resource "aws_iam_policy" "iam_policy_for_lambda_sqs" {
-
-  name         = "aws_iam_policy_for_terraform_aws_lambda_role_sqs"
-  path         = "/"
-  description  = "AWS IAM Policy for managing aws lambda role"
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": "sqs:*",
+            "Action": [
+                "dynamodb:GetShardIterator",
+                "dynamodb:GetItem",
+                "dynamodb:DescribeStream",
+                "dynamodb:ListStreams",
+                "dynamodb:GetRecords"
+            ],
             "Resource": "*"
         }
     ]
 }
-EOF
+)
+}
+
+
+resource "aws_iam_policy" "lambda_dynamo_put" {
+
+  name         = "lambda_dynamo_put"
+  path         = "/"
+
+  policy = jsonencode(
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "dynamodb:PutItem",
+            "Resource": "*"
+        }
+    ]
+}
+)
 }
 
 # Policy Attachment on the role.
@@ -87,12 +94,12 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
   policy_arn  = aws_iam_policy.iam_policy_for_lambda.arn
 }
 
-resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role2" {
+resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_put" {
   role        = aws_iam_role.lambda_role.name
-  policy_arn  = aws_iam_policy.iam_policy_for_lambda2.arn
+  policy_arn  = aws_iam_policy.lambda_dynamo_put.arn
 }
 
-resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role_sqs" {
+resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role_read" {
   role        = aws_iam_role.lambda_role.name
-  policy_arn  = aws_iam_policy.iam_policy_for_lambda_sqs.arn
+  policy_arn  = aws_iam_policy.read_dynamo_stream.arn
 }

@@ -16,6 +16,10 @@ data "archive_file" "zip_the_python_code" {
  output_path = "${path.module}/python/hello-python.zip"
 }
 
+
+############################################
+#Trigger für Lambda
+
 resource "aws_lambda_permission" "api_gw" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
@@ -25,6 +29,7 @@ resource "aws_lambda_permission" "api_gw" {
   # source_arn = "${aws_apigatewayv2_api.hello-api.execution_arn}/*/*/post"
 }
 
+# 
 resource "aws_lambda_permission" "with_sns" {
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
