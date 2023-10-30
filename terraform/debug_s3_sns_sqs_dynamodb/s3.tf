@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "tf_s3" {
   bucket = var.s3_bucketname
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification" {

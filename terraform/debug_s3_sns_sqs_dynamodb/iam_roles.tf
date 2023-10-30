@@ -92,7 +92,7 @@ resource "aws_iam_policy" "iam_policy_for_lambda_dynamodb" {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
-            "Resource": "arn:aws:dynamodb:eu-central-1:971147695342:table/Messages"
+            "Resource": "${aws_dynamodb_table.basic-dynamodb-table.arn}"
         }
     ]
 }
