@@ -1,0 +1,49 @@
+---
+
+- name: Update all packages
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: create directory
+  file:
+    path: /home/ubuntu/node_exporter
+    state: directory
+
+- name: download node exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz"
+    dest: "/home/ubuntu/node_exporter/node_exporter-1.6.1.linux-amd64.tar.gz"
+
+- name: unpack installation files
+  unarchive:
+    src: "/home/ubuntu/node_exporter/node_exporter-1.6.1.linux-amd64.tar.gz"
+    dest: "/home/ubuntu/node_exporter"
+    remote_src: yes
+
+- name: move files
+  copy:
+    src: "/home/ubuntu/node_exporter/node_exporter-1.6.1.linux-amd64/"
+    dest: "/usr/local/bin/node_exporter/"
+    remote_src: yes
+
+- name: create service file
+  copy:
+    dest: "/etc/systemd/system/node_exporter.service"
+    content: |
+      [Unit]
+      Description=Node Exporter Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/local/bin/node_exporter/node_exporter
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: service always started
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: true

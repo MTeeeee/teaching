@@ -1,0 +1,60 @@
+---
+- name: Update all packages
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: create directory
+  file:
+    path: /home/ubuntu/prometheus
+    state: directory
+
+- name: download prometheus
+  get_url:
+    url: "https://github.com/prometheus/prometheus/releases/download/v2.47.2/prometheus-2.47.2.linux-amd64.tar.gz"
+    dest: "/home/ubuntu/prometheus/prometheus-2.47.2.linux-amd64.tar.gz"
+
+- name: unpack installation files
+  unarchive:
+    src: "/home/ubuntu/prometheus/prometheus-2.47.2.linux-amd64.tar.gz"
+    dest: "/home/ubuntu/prometheus"
+    remote_src: yes
+
+- name: move files
+  copy:
+    src: "/home/ubuntu/prometheus/prometheus-2.47.2.linux-amd64/"
+    dest: "/usr/local/bin/prometheus/"
+    remote_src: yes
+
+- name: create config file
+  ansible.builtin.copy:
+    dest: "/usr/local/bin/prometheus/exporter.yml"
+    content: |
+      global:
+        scrape_interval: 15s
+
+      scrape_configs:
+        - job_name: node
+          static_configs:
+              - targets: ['localhost:9100','{{ hostvars['exporter']['ansible_host'] }}:9100'] 
+
+- name: create service file
+  copy:
+    dest: "/etc/systemd/system/prometheus.service"
+    content: |
+      [Unit]
+      Description=Prometheus Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/exporter.yml
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: service always started
+  systemd:
+    name: prometheus
+    state: started
+    enabled: true
