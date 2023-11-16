@@ -1,0 +1,58 @@
+---
+- name: Update all packages
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: create directory
+  file:
+    path: "{{ download_path }}/prometheus"
+    state: directory
+
+- name: download prometheus
+  get_url:
+    url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    dest: "{{ download_path }}/prometheus/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+
+- name: unpack installation files
+  unarchive:
+    src: "{{ download_path }}/prometheus/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    dest: "{{ download_path }}/prometheus"
+    remote_src: yes
+
+- name: move files
+  copy:
+    src: "{{ download_path }}/prometheus/prometheus-{{ prometheus_version }}.linux-amd64/"
+    dest: "{{ destination_path }}/prometheus"
+    remote_src: yes
+
+- name: copy config file
+  ansible.builtin.template:
+    src: "file/{{ item }}"
+    dest: "{{ destination_path }}/prometheus/prometheus.yml"
+  with_items:
+  - alert_rule.yml
+  - node_exporter.rules.yml
+  notify: restart prometheus service
+
+- name: create service file
+  copy:
+    dest: "/etc/systemd/system/prometheus.service"
+    content: |
+      [Unit]
+      Description=Prometheus Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart={{ destination_path }}/prometheus/prometheus --config.file={{ destination_path }}/prometheus//prometheus.yml
+
+      [Install]
+      WantedBy=multi-user.target
+    notify:
+    - restart prometheus service
+
+- name: start prometheus service
+  ansible.builtin.systemd:
+    name: prometheus
+    state: started

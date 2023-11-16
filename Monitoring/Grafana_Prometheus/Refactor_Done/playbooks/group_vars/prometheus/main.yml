@@ -1,0 +1,8 @@
+aws_access_key_id: "<Your Data>"
+aws_secret_access_key: "<Your Data>"
+aws_session_token: "<Your Data>"
+
+topic_arn: "arn:aws:sns:eu-central-1:971147695342:prom_alerts"
+prometheus_version: "2.47.2" # {{ prometheus_version }}
+alertmanager_version: "0.26.0" # {{ alertmanager_version }}
+alertmanager_region: "eu-central-1" # {{ alertmanager_region }}

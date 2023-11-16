@@ -37,9 +37,17 @@ resource "aws_security_group" "sg" {
   }
 
   ingress {
+    description = "alertmanager"
+    from_port   = 9093
+    to_port     = 9093
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "Grafana"
-    from_port   = 3333
-    to_port     = 3333
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

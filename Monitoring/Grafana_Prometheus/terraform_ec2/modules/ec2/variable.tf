@@ -15,5 +15,4 @@ variable "instance_ami" {
 
 variable "key" {
   type = string
-  default = "demo1"
 }

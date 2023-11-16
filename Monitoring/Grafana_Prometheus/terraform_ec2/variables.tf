@@ -7,3 +7,7 @@ variable "region" {
 variable "aws_profile" {
   type = string # Welcher Datentyp ist die Variable?
 }
+
+variable "key" {
+  type = string
+}

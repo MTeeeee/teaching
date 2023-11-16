@@ -1,0 +1,64 @@
+---
+
+- name: Update all packages
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: create directory
+  file:
+    path: "{{ download_path }}/alertmanager"
+    state: directory
+
+- name: download node exporter
+  get_url:
+    url: "https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
+    dest: "/home/ubuntu/alertmanager/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
+
+- name: unpack installation files
+  unarchive:
+    src: "{{ download_path }}/alertmanager/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
+    dest: "{{ download_path }}/alertmanager"
+    remote_src: yes
+
+- name: move files
+  copy:
+    src: "{{ download_path }}/alertmanager/alertmanager-{{ alertmanager_version }}.linux-amd64/"
+    dest: "{{ destination_path }}/alertmanager/"
+    remote_src: yes
+
+- name: create service file
+  copy:
+    dest: "/etc/systemd/system/alertmanager.service"
+    content: |
+      [Unit]
+      Description=Alertmanager Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart={{ destination_path }}/alertmanager/alertmanager --config.file={{ destination_path }}/alertmanager/alertmanager.yml
+      EnvironmentFile={{ destination_path }}/alertmanager/alertmanager.env
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: create env file
+  ansible.builtin.copy:
+    dest: "{{ destination_path }}/alertmanager/alertmanager.env"
+    content: |
+      AWS_ACCESS_KEY_ID={{ aws_access_key_id }}
+      AWS_SECRET_ACCESS_KEY={{ aws_secret_access_key }}
+      AWS_SESSION_TOKEN={{ aws_session_token }}
+
+- name: copy alertmanager config file
+  ansible.builtin.template:
+    src: files/alertmanager.yml.j2
+    dest: "{{ destination_path }}/alertmanager/alertmanager.yml"
+
+- name: service always started
+  systemd:
+    name: alertmanager
+    state: restarted
+    enabled: true
+    daemon_reload: yes

@@ -1,0 +1,19 @@
+---
+- name: Prometheus
+  hosts: prometheus
+  roles: 
+  - prometheus
+  - node_exporter
+  - grafana
+  - alertmanager
+  become: true
+
+- name: Node Exporter
+  hosts: node_exporter
+  roles: 
+  - node_exporter
+  become: true
+
+
+
+
